@@ -93,3 +93,15 @@ form.addEventListener("submit", async function (event) {
 
   render();
 });
+
+function updateLimits() {
+  state.limits = {
+    rain: Number(rainInput.value),
+    wind: Number(windInput.value),
+  };
+
+  render();
+}
+
+rainInput.addEventListener("input", updateLimits);
+windInput.addEventListener("input", updateLimits);
