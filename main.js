@@ -10,6 +10,7 @@
 //
 // 받아 오는 일은 api.js, 판단하는 규칙은 logic.js 에 둡니다. 이 파일에는 화면을 읽고 그리는 코드만.
 import { getForecast } from "./api.js";
+import { toDays } from "./logic.js";
 // 주어짐: 도시 세 곳의 위도·경도. 키는 index.html <select> 의 option value 와 같습니다.
 const CITIES = {
   seoul: { name: "Seoul", lat: 37.566, lon: 126.9784 },
@@ -26,6 +27,32 @@ const statusEl = document.getElementById("status");
 const summaryEl = document.getElementById("summary");
 const rowsEl = document.getElementById("rows");
 
+const state = {
+  city: null,
+  days: [],
+};
+
+function dayRow(day) {
+  const tr = document.createElement("tr");
+
+  for (const text of [
+    day.date.slice(5),
+    `${day.max}°`,
+    `${day.wind} km/h`,
+    `${day.rain}%`
+  ]) {
+    const td = document.createElement("td");
+    td.textContent = text;
+    tr.append(td);
+  }
+
+  return tr;
+}
+
+function render() {
+  rowsEl.replaceChildren(...state.days.map(dayRow));
+}
+
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -37,10 +64,15 @@ form.addEventListener("submit", async function (event) {
   try {
     const daily = await getForecast(city);
 
+    state.city = city;
+    state.days = toDays(daily);
+
     statusEl.textContent = "";
-    console.log(daily);
-  } catch (error) {
-    statusEl.textContent = `Could not load the forecast (${error.message}).`;
+  } catch (err) {
+    statusEl.textContent =
+      `Could not load the forecast (${err.message}).`;
     statusEl.classList.add("error");
   }
+
+  render();
 });
