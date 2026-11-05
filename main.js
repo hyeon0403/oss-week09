@@ -9,7 +9,7 @@
 // 커밋 메시지: p1: submit / p2: fetch / p3: rows / p4: rule / p5: live / p7: reasons
 //
 // 받아 오는 일은 api.js, 판단하는 규칙은 logic.js 에 둡니다. 이 파일에는 화면을 읽고 그리는 코드만.
-
+import { getForecast } from "./api.js";
 // 주어짐: 도시 세 곳의 위도·경도. 키는 index.html <select> 의 option value 와 같습니다.
 const CITIES = {
   seoul: { name: "Seoul", lat: 37.566, lon: 126.9784 },
@@ -26,12 +26,21 @@ const statusEl = document.getElementById("status");
 const summaryEl = document.getElementById("summary");
 const rowsEl = document.getElementById("rows");
 
-form.addEventListener("submit", function (event) {
-    event.preventDefault();
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
 
-    const city = CITIES[citySelect.value];
+  const city = CITIES[citySelect.value];
 
-    statusEl.textContent = "Loading...";
+  statusEl.classList.remove("error");
+  statusEl.textContent = "Loading...";
 
-    console.log(city);
+  try {
+    const daily = await getForecast(city);
+
+    statusEl.textContent = "";
+    console.log(daily);
+  } catch (error) {
+    statusEl.textContent = `Could not load the forecast (${error.message}).`;
+    statusEl.classList.add("error");
+  }
 });
